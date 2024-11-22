@@ -5,6 +5,7 @@ import {
   type Interaction,
 } from "discord.js";
 import { commands } from "./handlers.ts";
+import { registerCommands } from "./register.ts";
 
 export const startBot = async () => {
   const bot = new Client({
@@ -37,4 +38,5 @@ export const startBot = async () => {
   return { bot };
 };
 
+await registerCommands();
 await startBot();
