@@ -36,7 +36,7 @@ export const transfer = (
   if (amount <= 0) {
     return { error: "INVALID_AMOUNT" };
   }
-  if (sourceBalance < amount || source === "BANK") {
+  if (sourceBalance < amount && source !== "BANK") {
     return { error: "INSUFFICIENT_FUNDS" };
   }
   ADJUST_BALANCE.run(-amount, source);
