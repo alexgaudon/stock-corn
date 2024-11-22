@@ -106,10 +106,12 @@ export const commands: Array<Command> = [
       const topBalances = getTopBalances();
       const leaderboard = (
         await Promise.all(
-          topBalances.map(async (entry, index) => {
-            const user = await interaction.client.users.fetch(entry.id);
-            return `${index + 1}. ${user.username}: ${entry.balance}`;
-          }),
+          topBalances
+            .filter(({ id }) => id !== "BANK")
+            .map(async (entry, index) => {
+              const user = await interaction.client.users.fetch(entry.id);
+              return `${index + 1}. ${user.username}: ${entry.balance}`;
+            }),
         )
       ).join("\n");
       await interaction.reply(`The top corn barons are:\n${leaderboard}`);
