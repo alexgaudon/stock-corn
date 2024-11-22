@@ -4,6 +4,7 @@ import {
   GET_BALANCE,
   GET_LAST_DOLED,
   LOG_TRANSFER,
+  TOP_BALANCES,
 } from "./statements";
 
 type Result<T, E> = { value: T } | { error: E };
@@ -61,4 +62,8 @@ export const dole = (id: string): DoleResult => {
     return { error: "UNKNOWN_ERROR" };
   }
   return { value: transferResult.value.destinationBalance };
+};
+
+export const getTopBalances = () => {
+  return TOP_BALANCES.all();
 };

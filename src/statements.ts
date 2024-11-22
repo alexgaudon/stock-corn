@@ -23,3 +23,7 @@ export const ENSURE_USER = db.prepare<undefined, [string]>(
 export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
   "SELECT date FROM transfer WHERE source = 'BANK' AND destination = ? ORDER BY date DESC LIMIT 1",
 );
+
+export const TOP_BALANCES = db.prepare<{ id: string; balance: number }, []>(
+  "SELECT id, balance FROM user ORDER BY balance DESC LIMIT 10",
+);

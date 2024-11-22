@@ -3,7 +3,7 @@ import {
   EmbedBuilder,
   SlashCommandBuilder,
 } from "discord.js";
-import { dole, getBalance, transfer } from "./operations.ts";
+import { dole, getBalance, getTopBalances, transfer } from "./operations.ts";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
 type Command = { data: SlashCommandBuilder; handler: Handler };
@@ -93,6 +93,18 @@ export const commands: Array<Command> = [
             ]),
         ],
       });
+    },
+  },
+  {
+    data: new SlashCommandBuilder()
+      .setName("leaderboard")
+      .setDescription("Check the top corn barons"),
+    handler: async (interaction) => {
+      const topBalances = getTopBalances();
+      const leaderboard = topBalances
+        .map((entry, index) => `${index + 1}. ${entry.id}: ${entry.balance}`)
+        .join("\n");
+      await interaction.reply(`The top corn barons are:\n${leaderboard}`);
     },
   },
 ];
