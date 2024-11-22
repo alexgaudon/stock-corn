@@ -1,3 +1,3 @@
 import { Database } from "bun:sqlite";
 
-export const db = new Database("db.sqlite");
+export const db = new Database(Bun.env.DATABASE_PATH);
