@@ -105,7 +105,7 @@ export const commands: Array<Command> = [
     handler: async (interaction) => {
       const topBalances = getTopBalances();
       const leaderboard = topBalances
-        .map((entry, index) => `${index + 1}. ${entry.id}: ${entry.balance}`)
+        .map((entry, index) => `${index + 1}. <@${entry.id}>: ${entry.balance}`)
         .join("\n");
       await interaction.reply(`The top corn barons are:\n${leaderboard}`);
     },
