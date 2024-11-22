@@ -14,7 +14,7 @@ type TransferResult = Result<
     sourceBalance: number;
     destinationBalance: number;
   },
-  "INSUFFICIENT_FUNDS" | "SOURCE_USER_NOT_FOUND"
+  "INSUFFICIENT_FUNDS" | "SOURCE_USER_NOT_FOUND" | "INVALID_AMOUNT"
 >;
 
 type DoleResult = Result<number, "ALREADY_DOLED" | "UNKNOWN_ERROR">;
@@ -33,7 +33,10 @@ export const transfer = (
   ENSURE_USER.run(source);
   ENSURE_USER.run(destination);
   const sourceBalance = GET_BALANCE.get(source)!.balance;
-  if (sourceBalance < amount && source !== "BANK") {
+  if (amount <= 0) {
+    return { error: "INVALID_AMOUNT" };
+  }
+  if (sourceBalance < amount || source === "BANK") {
     return { error: "INSUFFICIENT_FUNDS" };
   }
   ADJUST_BALANCE.run(-amount, source);

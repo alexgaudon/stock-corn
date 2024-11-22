@@ -36,7 +36,7 @@ export const commands: Array<Command> = [
         return;
       }
       await interaction.reply(
-        `Here is your daily dole. Your balance is: ${doleResult.value}`,
+        `Here is your daily harvest. Your balance is: ${doleResult.value} cobs`,
       );
     },
   },
@@ -65,6 +65,9 @@ export const commands: Array<Command> = [
         switch (transferResult.error) {
           case "INSUFFICIENT_FUNDS":
             await interaction.reply("You do not have enough cobs.");
+            break;
+          case "INVALID_AMOUNT":
+            await interaction.reply("The amount must be positive");
             break;
           default:
             await interaction.reply("An unknown error occurred.");
