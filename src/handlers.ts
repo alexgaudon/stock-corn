@@ -46,10 +46,12 @@ export const commands: Array<Command> = [
                 {
                   name: "yield",
                   value: `${doleResult.value.yield} cobs`,
+                  inline: true,
                 },
                 {
                   name: "balance",
                   value: `${doleResult.value.balance} cobs`,
+                  inline: true,
                 },
               ]),
             ],
@@ -65,10 +67,12 @@ export const commands: Array<Command> = [
                   {
                     name: "yield",
                     value: `${doleResult.value.yield} cobs`,
+                    inline: true,
                   },
                   {
                     name: "balance",
                     value: `${doleResult.value.balance} cobs`,
+                    inline: true,
                   },
                 ]),
             ],
@@ -83,10 +87,12 @@ export const commands: Array<Command> = [
                   {
                     name: "yield",
                     value: `${doleResult.value.yield} cobs`,
+                    inline: true,
                   },
                   {
                     name: "balance",
                     value: `${doleResult.value.balance} cobs`,
+                    inline: true,
                   },
                 ]),
             ],
