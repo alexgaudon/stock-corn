@@ -38,9 +38,61 @@ export const commands: Array<Command> = [
         }
         return;
       }
-      await interaction.reply(
-        `Here is your daily harvest. Your balance is: ${doleResult.value} cobs`,
-      );
+      switch (doleResult.value.result) {
+        case "LUCKY":
+          await interaction.reply({
+            embeds: [
+              new EmbedBuilder().setTitle("Lucky harvest!").setFields([
+                {
+                  name: "yield",
+                  value: `${doleResult.value.yield} cobs`,
+                },
+                {
+                  name: "balance",
+                  value: `${doleResult.value.balance} cobs`,
+                },
+              ]),
+            ],
+          });
+          break;
+        case "UNFORTUNATE":
+          await interaction.reply({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("But the field was barren")
+                .setDescription("Your family may go hungry")
+                .setFields([
+                  {
+                    name: "yield",
+                    value: `${doleResult.value.yield} cobs`,
+                  },
+                  {
+                    name: "balance",
+                    value: `${doleResult.value.balance} cobs`,
+                  },
+                ]),
+            ],
+          });
+          break;
+        default:
+          await interaction.reply({
+            embeds: [
+              new EmbedBuilder()
+                .setTitle("You harvested your field")
+                .setFields([
+                  {
+                    name: "yield",
+                    value: `${doleResult.value.yield} cobs`,
+                  },
+                  {
+                    name: "balance",
+                    value: `${doleResult.value.balance} cobs`,
+                  },
+                ]),
+            ],
+          });
+          break;
+      }
     },
   },
   {

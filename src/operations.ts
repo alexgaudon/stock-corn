@@ -24,9 +24,15 @@ type TransferResult = Result<
 >;
 
 type DoleResult = Result<
-  number,
+  { result: keyof typeof DOLE_RESULT; yield: number; balance: number },
   { type: "ALREADY_DOLED"; duration: Duration } | { type: "UNKNOWN_ERROR" }
 >;
+
+const DOLE_RESULT = {
+  NORMAL: 100,
+  LUCKY: 777,
+  UNFORTUNATE: 5,
+};
 
 export const getBalance = (id: string): number => {
   ENSURE_USER.run(id);
@@ -65,20 +71,37 @@ export const dole = (id: string): DoleResult => {
     const lastDoledDate = new Date(lastDoled.date);
     const nextDoleDate = addHours(lastDoledDate, 23);
     const now = new Date();
-    if (now < nextDoleDate) {
-      return {
-        error: {
-          type: "ALREADY_DOLED",
-          duration: intervalToDuration(interval(now, nextDoleDate)),
-        },
-      } as const;
-    }
+    //if (now < nextDoleDate) {
+    //  return {
+    //    error: {
+    //      type: "ALREADY_DOLED",
+    //      duration: intervalToDuration(interval(now, nextDoleDate)),
+    //    },
+    //  } as const;
+    //}
   }
-  const transferResult = transfer("BANK", id, 100);
+  const luck = Math.random();
+  let result: keyof typeof DOLE_RESULT;
+  if (luck > 0.9) {
+    result = "LUCKY";
+  } else if (luck < 0.1) {
+    result = "UNFORTUNATE";
+  } else {
+    result = "NORMAL";
+  }
+
+  const transferResult = transfer("BANK", id, DOLE_RESULT[result]);
   if ("error" in transferResult) {
     return { error: { type: "UNKNOWN_ERROR" } };
   }
-  return { value: transferResult.value.destinationBalance };
+
+  return {
+    value: {
+      result: result,
+      yield: DOLE_RESULT[result],
+      balance: transferResult.value.destinationBalance,
+    },
+  };
 };
 
 export const getTopBalances = () => {
