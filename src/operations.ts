@@ -71,14 +71,14 @@ export const dole = (id: string): DoleResult => {
     const lastDoledDate = new Date(lastDoled.date);
     const nextDoleDate = addHours(lastDoledDate, 23);
     const now = new Date();
-    //if (now < nextDoleDate) {
-    //  return {
-    //    error: {
-    //      type: "ALREADY_DOLED",
-    //      duration: intervalToDuration(interval(now, nextDoleDate)),
-    //    },
-    //  } as const;
-    //}
+    if (now < nextDoleDate) {
+      return {
+        error: {
+          type: "ALREADY_DOLED",
+          duration: intervalToDuration(interval(now, nextDoleDate)),
+        },
+      } as const;
+    }
   }
   const luck = Math.random();
   let result: keyof typeof DOLE_RESULT;
