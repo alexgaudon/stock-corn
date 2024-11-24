@@ -4,6 +4,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import { dole, getBalance, getTopBalances, transfer } from "./operations.ts";
+import { formatDuration } from "date-fns";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
 type Command = { data: SlashCommandBuilder; handler: Handler };
@@ -25,9 +26,11 @@ export const commands: Array<Command> = [
     handler: async (interaction) => {
       const doleResult = dole(interaction.user.id);
       if ("error" in doleResult) {
-        switch (doleResult.error) {
+        switch (doleResult.error.type) {
           case "ALREADY_DOLED":
-            await interaction.reply("You have already harvested today.");
+            await interaction.reply(
+              `You have already harvested today. You can harvest again in ${formatDuration(doleResult.error.duration)}.`,
+            );
             break;
           default:
             await interaction.reply("An unknown error occurred.");

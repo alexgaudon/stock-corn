@@ -1,4 +1,10 @@
 import {
+  addHours,
+  interval,
+  intervalToDuration,
+  type Duration,
+} from "date-fns";
+import {
   ADJUST_BALANCE,
   ENSURE_USER,
   GET_BALANCE,
@@ -17,7 +23,10 @@ type TransferResult = Result<
   "INSUFFICIENT_FUNDS" | "SOURCE_USER_NOT_FOUND" | "INVALID_AMOUNT"
 >;
 
-type DoleResult = Result<number, "ALREADY_DOLED" | "UNKNOWN_ERROR">;
+type DoleResult = Result<
+  number,
+  { type: "ALREADY_DOLED"; duration: Duration } | { type: "UNKNOWN_ERROR" }
+>;
 
 export const getBalance = (id: string): number => {
   ENSURE_USER.run(id);
@@ -54,15 +63,20 @@ export const dole = (id: string): DoleResult => {
   const lastDoled = GET_LAST_DOLED.get(id);
   if (lastDoled) {
     const lastDoledDate = new Date(lastDoled.date);
+    const nextDoleDate = addHours(lastDoledDate, 23);
     const now = new Date();
-    const oneDay = 1000 * 60 * 60 * 24;
-    if (now.getTime() - lastDoledDate.getTime() < oneDay) {
-      return { error: "ALREADY_DOLED" } as const;
+    if (now < nextDoleDate) {
+      return {
+        error: {
+          type: "ALREADY_DOLED",
+          duration: intervalToDuration(interval(now, nextDoleDate)),
+        },
+      } as const;
     }
   }
   const transferResult = transfer("BANK", id, 100);
   if ("error" in transferResult) {
-    return { error: "UNKNOWN_ERROR" };
+    return { error: { type: "UNKNOWN_ERROR" } };
   }
   return { value: transferResult.value.destinationBalance };
 };
