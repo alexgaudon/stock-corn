@@ -1,29 +1,53 @@
 import { db } from "./db";
+import type { Commodity } from "./enum";
 
-export const GET_BALANCE = db.prepare<{ balance: number }, [string]>(
-  "SELECT balance FROM user WHERE id = ?",
+export const GET_BALANCE = db.prepare<
+  { amount: number },
+  [{ $farmer: string; $commodity: Commodity }]
+>(
+  `SELECT amount FROM balance WHERE farmer = $farmer AND commodity = $commodity`,
 );
 
-export const INSERT_USER = db.prepare<undefined, [string]>(
-  "INSERT INTO user (id, balance) VALUES (?, 0)",
-);
+export const CREATE_TRADE = db.prepare<
+  undefined,
+  {
+    $sourceFarmer: string;
+    $sourceCommodity: Commodity;
+    $sourceAmount: number;
+    $destinationFarmer: string;
+    $destinationCommodity: Commodity;
+    $destinationAmount: number;
+  }
+>(`
+  INSERT INTO trade (
+    source_farmer, 
+    source_commodity,
+    source_amount,
+    destination_farmer, 
+    destination_commodity,
+    destination_amount,
+    date) 
+  VALUES (
+    $sourceFarmer,
+    $sourceCommodity,
+    $sourceAmount,
+    $destinationFarmer,
+    $destinationCommodity,
+    $destinationAmount,
+    CURRENT_TIMESTAMP);
+`);
 
-export const ADJUST_BALANCE = db.prepare<undefined, [number, string]>(
-  "UPDATE user SET balance = balance + ? WHERE id = ?",
-);
-
-export const LOG_TRANSFER = db.prepare<undefined, [string, string, number]>(
-  "INSERT INTO transfer (source, destination, amount, date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)",
-);
-
-export const ENSURE_USER = db.prepare<undefined, [string]>(
-  "INSERT OR IGNORE INTO user (id, balance) VALUES (?, 0)",
+export const ENSURE_FARMER = db.prepare<undefined, [string]>(
+  "INSERT OR IGNORE INTO farmer (id, date_started) VALUES (?, CURRENT_TIMESTAMP)",
 );
 
 export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
-  "SELECT date FROM transfer WHERE source = 'BANK' AND destination = ? ORDER BY date DESC LIMIT 1",
+  "SELECT date FROM trade WHERE source_farmer = 'BANK' AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
 );
 
-export const TOP_BALANCES = db.prepare<{ id: string; balance: number }, []>(
-  "SELECT id, balance FROM user ORDER BY balance DESC LIMIT 10",
-);
+export const TOP_BALANCES = db.prepare<{ farmer: string; amount: number }, []>(`
+  SELECT farmer, amount
+  FROM balance
+  WHERE commodity = 1
+  ORDER BY amount DESC LIMIT 10
+`);

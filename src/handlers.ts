@@ -3,8 +3,9 @@ import {
   EmbedBuilder,
   SlashCommandBuilder,
 } from "discord.js";
-import { dole, getBalance, getTopBalances, transfer } from "./operations.ts";
+import { dole, getBalance, getTopBalances, trade } from "./operations.ts";
 import { formatDuration } from "date-fns";
+import { Commodity } from "./enum.ts";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
 type Command = { data: SlashCommandBuilder; handler: Handler };
@@ -15,7 +16,7 @@ export const commands: Array<Command> = [
       .setName("balance")
       .setDescription("Check your stockpile"),
     handler: async (interaction) => {
-      const balance = getBalance(interaction.user.id);
+      const balance = getBalance(interaction.user.id, Commodity.Corn);
       await interaction.reply(`Your balance is ${balance}`);
     },
   },
@@ -121,9 +122,16 @@ export const commands: Array<Command> = [
       const source = interaction.user.id;
       const destinationUser = interaction.options.getUser("user")!;
       const amount = interaction.options.getInteger("amount")!;
-      const transferResult = transfer(source, destinationUser.id, amount);
-      if ("error" in transferResult) {
-        switch (transferResult.error) {
+      const tradeResult = trade(
+        source,
+        Commodity.Corn,
+        amount,
+        destinationUser.id,
+        Commodity.Corn,
+        amount,
+      );
+      if ("error" in tradeResult) {
+        switch (tradeResult.error) {
           case "INSUFFICIENT_FUNDS":
             await interaction.reply("You do not have enough cobs.");
             break;
@@ -146,12 +154,12 @@ export const commands: Array<Command> = [
             .addFields([
               {
                 name: interaction.user.displayName,
-                value: `${transferResult.value.sourceBalance} cobs`,
+                value: `${tradeResult.value.sourceBalance} cobs`,
                 inline: true,
               },
               {
                 name: destinationUser.displayName,
-                value: `${transferResult.value.destinationBalance} cobs`,
+                value: `${tradeResult.value.destinationBalance} cobs`,
                 inline: true,
               },
             ]),
@@ -168,10 +176,10 @@ export const commands: Array<Command> = [
       const leaderboard = (
         await Promise.all(
           topBalances
-            .filter(({ id }) => id !== "BANK")
+            .filter(({ farmer }) => farmer !== "BANK")
             .map(async (entry, index) => {
-              const user = await interaction.client.users.fetch(entry.id);
-              return `${index + 1}. ${user.username}: ${entry.balance}`;
+              const user = await interaction.client.users.fetch(entry.farmer);
+              return `${index + 1}. ${user.username}: ${entry.amount}`;
             }),
         )
       ).join("\n");

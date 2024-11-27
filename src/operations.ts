@@ -5,13 +5,13 @@ import {
   type Duration,
 } from "date-fns";
 import {
-  ADJUST_BALANCE,
-  ENSURE_USER,
   GET_BALANCE,
   GET_LAST_DOLED,
-  LOG_TRANSFER,
+  CREATE_TRADE,
   TOP_BALANCES,
+  ENSURE_FARMER,
 } from "./statements";
+import { Commodity } from "./enum";
 
 type Result<T, E> = { value: T } | { error: E };
 
@@ -34,33 +34,51 @@ const DOLE_RESULT = {
   UNFORTUNATE: 5,
 };
 
-export const getBalance = (id: string): number => {
-  ENSURE_USER.run(id);
-  let balance = GET_BALANCE.get(id)!.balance;
-  return balance;
+export const getBalance = (id: string, commodity: Commodity): number => {
+  ENSURE_FARMER.run(id);
+  let result = GET_BALANCE.get({
+    $farmer: id,
+    $commodity: commodity,
+  });
+  return result!.amount;
 };
 
-export const transfer = (
-  source: string,
-  destination: string,
-  amount: number,
+export const trade = (
+  sourceFarmer: string,
+  sourceCommodity: Commodity,
+  sourceAmount: number,
+  destinationFarmer: string,
+  destinationCommodity: Commodity,
+  destinationAmount: number,
 ): TransferResult => {
-  ENSURE_USER.run(source);
-  ENSURE_USER.run(destination);
-  const sourceBalance = GET_BALANCE.get(source)!.balance;
-  if (amount <= 0) {
+  if (sourceAmount <= 0) {
     return { error: "INVALID_AMOUNT" };
   }
-  if (sourceBalance < amount && source !== "BANK") {
+  const sourceBalance = GET_BALANCE.get({
+    $farmer: sourceFarmer,
+    $commodity: sourceCommodity,
+  })!.amount;
+  if (sourceBalance < sourceAmount && sourceFarmer !== "BANK") {
     return { error: "INSUFFICIENT_FUNDS" };
   }
-  ADJUST_BALANCE.run(-amount, source);
-  ADJUST_BALANCE.run(amount, destination);
-  LOG_TRANSFER.run(source, destination, amount);
+  CREATE_TRADE.run({
+    $sourceFarmer: sourceFarmer,
+    $sourceCommodity: sourceCommodity,
+    $sourceAmount: sourceAmount,
+    $destinationFarmer: destinationFarmer,
+    $destinationCommodity: destinationCommodity,
+    $destinationAmount: destinationAmount,
+  });
   return {
     value: {
-      sourceBalance: GET_BALANCE.get(source)!.balance,
-      destinationBalance: GET_BALANCE.get(destination)!.balance,
+      sourceBalance: GET_BALANCE.get({
+        $farmer: sourceFarmer,
+        $commodity: sourceCommodity,
+      })!.amount,
+      destinationBalance: GET_BALANCE.get({
+        $farmer: destinationFarmer,
+        $commodity: destinationCommodity,
+      })!.amount,
     },
   };
 };
@@ -90,7 +108,14 @@ export const dole = (id: string): DoleResult => {
     result = "NORMAL";
   }
 
-  const transferResult = transfer("BANK", id, DOLE_RESULT[result]);
+  const transferResult = trade(
+    "BANK",
+    Commodity.Corn,
+    DOLE_RESULT[result],
+    id,
+    Commodity.Corn,
+    DOLE_RESULT[result],
+  );
   if ("error" in transferResult) {
     return { error: { type: "UNKNOWN_ERROR" } };
   }
