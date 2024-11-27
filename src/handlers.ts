@@ -3,7 +3,7 @@ import {
   EmbedBuilder,
   SlashCommandBuilder,
 } from "discord.js";
-import { dole, getBalance, getTopBalances, trade } from "./operations.ts";
+import { dole, getBalances, getTopBalances, trade } from "./operations.ts";
 import { formatDuration } from "date-fns";
 import { Commodity } from "./enum.ts";
 
@@ -16,8 +16,18 @@ export const commands: Array<Command> = [
       .setName("balance")
       .setDescription("Check your stockpile"),
     handler: async (interaction) => {
-      const balance = getBalance(interaction.user.id, Commodity.Corn);
-      await interaction.reply(`Your balance is ${balance}`);
+      const balances = getBalances(interaction.user.id);
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder({
+            title: "Your stockpile",
+            fields: balances.map(({ commodity, amount }) => ({
+              name: Commodity[commodity],
+              value: `${amount}`,
+            })),
+          }),
+        ],
+      });
     },
   },
   {

@@ -5,11 +5,12 @@ import {
   type Duration,
 } from "date-fns";
 import {
-  GET_BALANCE,
+  GET_BALANCES,
   GET_LAST_DOLED,
   CREATE_TRADE,
   TOP_BALANCES,
   ENSURE_FARMER,
+  GET_BALANCE,
 } from "./statements";
 import { Commodity } from "./enum";
 
@@ -34,13 +35,9 @@ const DOLE_RESULT = {
   UNFORTUNATE: 5,
 };
 
-export const getBalance = (id: string, commodity: Commodity): number => {
+export const getBalances = (id: string) => {
   ENSURE_FARMER.run(id);
-  let result = GET_BALANCE.get({
-    $farmer: id,
-    $commodity: commodity,
-  });
-  return result!.amount;
+  return GET_BALANCES.all({ $farmer: id });
 };
 
 export const trade = (

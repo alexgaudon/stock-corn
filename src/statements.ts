@@ -8,6 +8,11 @@ export const GET_BALANCE = db.prepare<
   `SELECT amount FROM balance WHERE farmer = $farmer AND commodity = $commodity`,
 );
 
+export const GET_BALANCES = db.prepare<
+  { commodity: Commodity; amount: number },
+  [{ $farmer: string }]
+>(`SELECT commodity, amount FROM balance WHERE farmer = $farmer`);
+
 export const CREATE_TRADE = db.prepare<
   undefined,
   {
