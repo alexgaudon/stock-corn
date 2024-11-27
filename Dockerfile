@@ -6,4 +6,4 @@ COPY src ./
 COPY start.sh ./
 
 RUN bun install --production
-ENTRYPOINT [ "./start.sh" ]
+CMD [ "./start.sh" ]
