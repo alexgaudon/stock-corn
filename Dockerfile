@@ -5,4 +5,4 @@ COPY bun.lockb ./
 COPY src ./
 
 RUN bun install --production
-ENTRYPOINT [ "start.sh" ]
+ENTRYPOINT [ "./start.sh" ]
