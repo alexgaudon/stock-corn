@@ -183,13 +183,14 @@ export const commands: Array<Command> = [
       .setDescription("Check the top corn barons"),
     handler: async (interaction) => {
       const topBalances = getTopBalances();
+      const balances = topBalances.filter(({farmer}) => farmer !== 'BANK').map(({amount}) => amount);
       const leaderboard = (
         await Promise.all(
           topBalances
             .filter(({ farmer }) => farmer !== "BANK")
-            .map(async (entry, index) => {
+            .map(async (entry) => {
               const user = await interaction.client.users.fetch(entry.farmer);
-              return `${index + 1}. ${user.username}: ${entry.amount}`;
+              return `${balances.indexOf(entry.amount) + 1} - ${user.username}: ${entry.amount}`;
             }),
         )
       ).join("\n");
