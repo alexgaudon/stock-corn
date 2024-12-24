@@ -37,5 +37,7 @@ INSERT INTO trade (
 SELECT source, 1, amount, destination, 1, amount, date FROM transfer;
 DROP TABLE transfer;
 
+INSERT INTO balance (farmer, commodity, amount) VALUES ('BANK', 1, 0);
+
 
 -- migrate:down
