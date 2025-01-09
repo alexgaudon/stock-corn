@@ -84,7 +84,7 @@ export const dole = (id: string): DoleResult => {
   const lastDoled = GET_LAST_DOLED.get(id);
   if (lastDoled) {
     const lastDoledDate = new Date(lastDoled.date);
-    const nextDoleDate = addHours(lastDoledDate, 23);
+    const nextDoleDate = addHours(lastDoledDate, 20);
     const now = new Date();
     if (now < nextDoleDate) {
       return {
