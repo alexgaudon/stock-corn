@@ -244,13 +244,13 @@ export const commands: Array<Command> = [
           .setRequired(true),
       ) as SlashCommandBuilder,
     handler: async (interaction) => {
-      const user = interaction.options.getUser("user")!;
-      const exileResult = exile(user.id);
-
       if (interaction.user.id !== Bun.env.CORN_CZAR_ID) {
         await interaction.reply("You are not authorized to exile users.");
         return;
       }
+
+      const user = interaction.options.getUser("user")!;
+      const exileResult = exile(user.id);
 
       if ("error" in exileResult) {
         switch (exileResult.error.type) {
