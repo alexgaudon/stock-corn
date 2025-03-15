@@ -56,3 +56,11 @@ export const TOP_BALANCES = db.prepare<{ farmer: string; amount: number }, []>(`
   WHERE commodity = 1
   ORDER BY amount DESC LIMIT 10
 `);
+
+export const EXILE = db.prepare<undefined, [string]>(`
+  UPDATE farmer SET exiled = 1 WHERE id = ?
+`);
+
+export const IS_EXILED = db.prepare<{ exiled: boolean }, [string]>(`
+  SELECT exiled FROM farmer WHERE id = ? LIMIT 1
+`);
