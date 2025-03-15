@@ -1,11 +1,18 @@
+import { formatDuration } from "date-fns";
 import {
   ChatInputCommandInteraction,
   EmbedBuilder,
   SlashCommandBuilder,
 } from "discord.js";
-import { dole, getBalances, getTopBalances, trade } from "./operations.ts";
-import { formatDuration } from "date-fns";
 import { Commodity } from "./enum.ts";
+import {
+  dole,
+  exile,
+  getBalances,
+  getTopBalances,
+  isExiled,
+  trade,
+} from "./operations.ts";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
 type Command = { data: SlashCommandBuilder; handler: Handler };
@@ -16,6 +23,11 @@ export const commands: Array<Command> = [
       .setName("balance")
       .setDescription("Check your stockpile"),
     handler: async (interaction) => {
+      if (isExiled(interaction.user.id)) {
+        await interaction.reply("You are exiled from the kingdom.");
+        return;
+      }
+
       const balances = getBalances(interaction.user.id);
       await interaction.reply({
         embeds: [
@@ -35,12 +47,19 @@ export const commands: Array<Command> = [
       .setName("harvest")
       .setDescription("Reap the golden bounty"),
     handler: async (interaction) => {
+      if (isExiled(interaction.user.id)) {
+        await interaction.reply("You are exiled from the kingdom.");
+        return;
+      }
+
       const doleResult = dole(interaction.user.id);
       if ("error" in doleResult) {
         switch (doleResult.error.type) {
           case "ALREADY_DOLED":
             await interaction.reply(
-              `You have already harvested today. You can harvest again in ${formatDuration(doleResult.error.duration)}.`,
+              `You have already harvested today. You can harvest again in ${formatDuration(
+                doleResult.error.duration
+              )}.`
             );
             break;
           default:
@@ -120,15 +139,20 @@ export const commands: Array<Command> = [
         option
           .setName("user")
           .setDescription("The user to send corn to")
-          .setRequired(true),
+          .setRequired(true)
       )
       .addIntegerOption((option) =>
         option
           .setName("amount")
           .setDescription("The amount of corn to send")
-          .setRequired(true),
-      ),
+          .setRequired(true)
+      ) as SlashCommandBuilder,
     handler: async (interaction) => {
+      if (isExiled(interaction.user.id)) {
+        await interaction.reply("You are exiled from the kingdom.");
+        return;
+      }
+
       const source = interaction.user.id;
       const destinationUser = interaction.options.getUser("user")!;
       const amount = interaction.options.getInteger("amount")!;
@@ -138,7 +162,7 @@ export const commands: Array<Command> = [
         amount,
         destinationUser.id,
         Commodity.Corn,
-        amount,
+        amount
       );
       if ("error" in tradeResult) {
         switch (tradeResult.error) {
@@ -159,7 +183,7 @@ export const commands: Array<Command> = [
           new EmbedBuilder()
             .setTitle("Transfer successful")
             .setDescription(
-              `You have sent ${amount} cobs of corn to <@${destinationUser.id}>.`,
+              `You have sent ${amount} cobs of corn to <@${destinationUser.id}>.`
             )
             .addFields([
               {
@@ -183,18 +207,59 @@ export const commands: Array<Command> = [
       .setDescription("Check the top corn barons"),
     handler: async (interaction) => {
       const topBalances = getTopBalances();
-      const balances = topBalances.filter(({farmer}) => farmer !== 'BANK').map(({amount}) => amount);
+      const balances = topBalances
+        .filter(({ farmer }) => !["BANK", "JAIL"].includes(farmer))
+        .map(({ amount }) => amount);
       const leaderboard = (
         await Promise.all(
           topBalances
-            .filter(({ farmer }) => farmer !== "BANK")
+            .filter(({ farmer }) => !["BANK", "JAIL"].includes(farmer))
             .map(async (entry) => {
               const user = await interaction.client.users.fetch(entry.farmer);
-              return `${balances.indexOf(entry.amount) + 1}\\. ${user.username}: ${entry.amount}`;
-            }),
+              return `${balances.indexOf(entry.amount) + 1}\\. ${
+                user.username
+              }: ${entry.amount}`;
+            })
         )
       ).join("\n");
       await interaction.reply(`The top corn barons are:\n${leaderboard}`);
+    },
+  },
+  {
+    data: new SlashCommandBuilder()
+      .setName("exile")
+      .setDescription("Exile a user from the kingdom")
+      .addUserOption((option) =>
+        option
+          .setName("user")
+          .setDescription("The user to exile")
+          .setRequired(true)
+      ) as SlashCommandBuilder,
+    handler: async (interaction) => {
+      const user = interaction.options.getUser("user")!;
+      const exileResult = exile(user.id);
+
+      if ("error" in exileResult) {
+        switch (exileResult.error.type) {
+          case "ALREADY_EXILED":
+            await interaction.reply("The user is already exiled.");
+            break;
+          case "UNKNOWN_ERROR":
+            await interaction.reply("An unknown error occurred.");
+            break;
+        }
+        return;
+      }
+
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle(`${user.username} has been exiled.`)
+            .setDescription(
+              `All ${exileResult.value.jailed} cobs of corn have been sent to jail.`
+            ),
+        ],
+      });
     },
   },
 ];

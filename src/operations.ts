@@ -4,15 +4,17 @@ import {
   intervalToDuration,
   type Duration,
 } from "date-fns";
+import { Commodity } from "./enum";
 import {
+  CREATE_TRADE,
+  ENSURE_FARMER,
+  EXILE,
+  GET_BALANCE,
   GET_BALANCES,
   GET_LAST_DOLED,
-  CREATE_TRADE,
+  IS_EXILED,
   TOP_BALANCES,
-  ENSURE_FARMER,
-  GET_BALANCE,
 } from "./statements";
-import { Commodity } from "./enum";
 
 type Result<T, E> = { value: T } | { error: E };
 
@@ -28,6 +30,13 @@ type DoleResult = Result<
   { result: keyof typeof DOLE_RESULT; yield: number; balance: number },
   { type: "ALREADY_DOLED"; duration: Duration } | { type: "UNKNOWN_ERROR" }
 >;
+
+type ExileResult = Result<
+  { result: "EXILED"; jailed: number },
+  { type: "ALREADY_EXILED" } | { type: "UNKNOWN_ERROR" }
+>;
+
+type IsExiledResult = Result<boolean, { type: "UNKNOWN_ERROR" }>;
 
 const DOLE_RESULT = {
   NORMAL: 100,
@@ -46,7 +55,7 @@ export const trade = (
   sourceAmount: number,
   destinationFarmer: string,
   destinationCommodity: Commodity,
-  destinationAmount: number,
+  destinationAmount: number
 ): TransferResult => {
   if (sourceAmount <= 0) {
     return { error: "INVALID_AMOUNT" };
@@ -111,7 +120,7 @@ export const dole = (id: string): DoleResult => {
     DOLE_RESULT[result],
     id,
     Commodity.Corn,
-    DOLE_RESULT[result],
+    DOLE_RESULT[result]
   );
   if ("error" in transferResult) {
     return { error: { type: "UNKNOWN_ERROR" } };
@@ -128,4 +137,49 @@ export const dole = (id: string): DoleResult => {
 
 export const getTopBalances = () => {
   return TOP_BALANCES.all();
+};
+
+export const isExiled = (id: string): boolean => {
+  const isExiled = IS_EXILED.get(id);
+  return isExiled?.exiled ?? false;
+};
+
+export const exile = (id: string): ExileResult => {
+  ENSURE_FARMER.run(id);
+
+  const isExiled = IS_EXILED.get(id)?.exiled;
+
+  if (isExiled) {
+    return { error: { type: "ALREADY_EXILED" } };
+  }
+
+  EXILE.run(id);
+
+  const amountToBeExiled =
+    GET_BALANCE.get({
+      $farmer: id,
+      $commodity: Commodity.Corn,
+    })?.amount ?? 0;
+
+  if (amountToBeExiled > 0) {
+    const exileResult = trade(
+      id,
+      Commodity.Corn,
+      amountToBeExiled,
+      "JAIL",
+      Commodity.Corn,
+      amountToBeExiled
+    );
+
+    if ("error" in exileResult) {
+      return { error: { type: "UNKNOWN_ERROR" } };
+    }
+  }
+
+  return {
+    value: {
+      result: "EXILED",
+      jailed: amountToBeExiled,
+    },
+  };
 };
