@@ -5,7 +5,7 @@ export const GET_BALANCE = db.prepare<
   { amount: number },
   [{ $farmer: string; $commodity: Commodity }]
 >(
-  `SELECT amount FROM balance WHERE farmer = $farmer AND commodity = $commodity`
+  `SELECT amount FROM balance WHERE farmer = $farmer AND commodity = $commodity`,
 );
 
 export const GET_BALANCES = db.prepare<
@@ -43,11 +43,11 @@ export const CREATE_TRADE = db.prepare<
 `);
 
 export const ENSURE_FARMER = db.prepare<undefined, [string]>(
-  "INSERT OR IGNORE INTO farmer (id, date_started) VALUES (?, CURRENT_TIMESTAMP)"
+  "INSERT OR IGNORE INTO farmer (id, date_started) VALUES (?, CURRENT_TIMESTAMP)",
 );
 
 export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
-  "SELECT date FROM trade WHERE source_farmer = 'BANK' AND destination_farmer = ? ORDER BY date DESC LIMIT 1"
+  "SELECT date FROM trade WHERE source_farmer = 'BANK' AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
 );
 
 export const TOP_BALANCES = db.prepare<{ farmer: string; amount: number }, []>(`

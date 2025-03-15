@@ -58,8 +58,8 @@ export const commands: Array<Command> = [
           case "ALREADY_DOLED":
             await interaction.reply(
               `You have already harvested today. You can harvest again in ${formatDuration(
-                doleResult.error.duration
-              )}.`
+                doleResult.error.duration,
+              )}.`,
             );
             break;
           default:
@@ -139,13 +139,13 @@ export const commands: Array<Command> = [
         option
           .setName("user")
           .setDescription("The user to send corn to")
-          .setRequired(true)
+          .setRequired(true),
       )
       .addIntegerOption((option) =>
         option
           .setName("amount")
           .setDescription("The amount of corn to send")
-          .setRequired(true)
+          .setRequired(true),
       ) as SlashCommandBuilder,
     handler: async (interaction) => {
       if (isExiled(interaction.user.id)) {
@@ -162,7 +162,7 @@ export const commands: Array<Command> = [
         amount,
         destinationUser.id,
         Commodity.Corn,
-        amount
+        amount,
       );
       if ("error" in tradeResult) {
         switch (tradeResult.error) {
@@ -183,7 +183,7 @@ export const commands: Array<Command> = [
           new EmbedBuilder()
             .setTitle("Transfer successful")
             .setDescription(
-              `You have sent ${amount} cobs of corn to <@${destinationUser.id}>.`
+              `You have sent ${amount} cobs of corn to <@${destinationUser.id}>.`,
             )
             .addFields([
               {
@@ -219,7 +219,7 @@ export const commands: Array<Command> = [
               return `${balances.indexOf(entry.amount) + 1}\\. ${
                 user.username
               }: ${entry.amount}`;
-            })
+            }),
         )
       ).join("\n");
       await interaction.reply(`The top corn barons are:\n${leaderboard}`);
@@ -233,7 +233,7 @@ export const commands: Array<Command> = [
         option
           .setName("user")
           .setDescription("The user to exile")
-          .setRequired(true)
+          .setRequired(true),
       ) as SlashCommandBuilder,
     handler: async (interaction) => {
       const user = interaction.options.getUser("user")!;
@@ -256,7 +256,7 @@ export const commands: Array<Command> = [
           new EmbedBuilder()
             .setTitle(`${user.username} has been exiled.`)
             .setDescription(
-              `All ${exileResult.value.jailed} cobs of corn have been sent to jail.`
+              `All ${exileResult.value.jailed} cobs of corn have been sent to jail.`,
             ),
         ],
       });

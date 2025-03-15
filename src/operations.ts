@@ -55,7 +55,7 @@ export const trade = (
   sourceAmount: number,
   destinationFarmer: string,
   destinationCommodity: Commodity,
-  destinationAmount: number
+  destinationAmount: number,
 ): TransferResult => {
   if (sourceAmount <= 0) {
     return { error: "INVALID_AMOUNT" };
@@ -120,7 +120,7 @@ export const dole = (id: string): DoleResult => {
     DOLE_RESULT[result],
     id,
     Commodity.Corn,
-    DOLE_RESULT[result]
+    DOLE_RESULT[result],
   );
   if ("error" in transferResult) {
     return { error: { type: "UNKNOWN_ERROR" } };
@@ -168,7 +168,7 @@ export const exile = (id: string): ExileResult => {
       amountToBeExiled,
       "JAIL",
       Commodity.Corn,
-      amountToBeExiled
+      amountToBeExiled,
     );
 
     if ("error" in exileResult) {
