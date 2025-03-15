@@ -155,6 +155,14 @@ export const commands: Array<Command> = [
 
       const source = interaction.user.id;
       const destinationUser = interaction.options.getUser("user")!;
+
+      if (isExiled(destinationUser.id)) {
+        await interaction.reply(
+          "The recipient is exiled from the kingdom. They will not receive the corn.",
+        );
+        return;
+      }
+
       const amount = interaction.options.getInteger("amount")!;
       const tradeResult = trade(
         source,
@@ -238,6 +246,11 @@ export const commands: Array<Command> = [
     handler: async (interaction) => {
       const user = interaction.options.getUser("user")!;
       const exileResult = exile(user.id);
+
+      if (interaction.user.id !== Bun.env.CORN_CZAR_ID) {
+        await interaction.reply("You are not authorized to exile users.");
+        return;
+      }
 
       if ("error" in exileResult) {
         switch (exileResult.error.type) {
