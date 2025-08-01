@@ -3,8 +3,9 @@ import {
   ChatInputCommandInteraction,
   EmbedBuilder,
   SlashCommandBuilder,
+  type SlashCommandOptionsOnlyBuilder,
 } from "discord.js";
-import { Commodity } from "./enum.ts";
+import { Commodity } from "../enum.ts";
 import {
   dole,
   exile,
@@ -12,10 +13,13 @@ import {
   getTopBalances,
   isExiled,
   trade,
-} from "./operations.ts";
+} from "../operations.ts";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
-type Command = { data: SlashCommandBuilder; handler: Handler };
+type Command = {
+  data: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder;
+  handler: Handler;
+};
 
 export const commands: Array<Command> = [
   {
@@ -216,19 +220,21 @@ export const commands: Array<Command> = [
     handler: async (interaction) => {
       const topBalances = getTopBalances();
       const balances = topBalances
+        .filter(({ farmer }) => farmer !== "BANK")
         .map(({ amount }) => amount);
       const leaderboard = (
         await Promise.all(
-          topBalances
-            .map(async (entry) => {
-              const user = await interaction.client.users.fetch(entry.farmer);
-              return `${balances.indexOf(entry.amount) + 1}\\. ${
-                user.username
-              }: ${entry.amount}`;
-            }),
+          topBalances.map(async (entry) => {
+            const user = await interaction.client.users.fetch(entry.farmer);
+            return `${balances.indexOf(entry.amount) + 1}\\. ${
+              user.username
+            }: ${entry.amount}`;
+          }),
         )
       ).join("\n");
-      await interaction.reply(`The top corn barons are:\n${leaderboard}`);
+      await interaction.reply({
+        content: `The top corn barons are:\n${leaderboard}`,
+      });
     },
   },
   {

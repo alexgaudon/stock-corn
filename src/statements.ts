@@ -25,13 +25,13 @@ export const CREATE_TRADE = db.prepare<
   }
 >(`
   INSERT INTO trade (
-    source_farmer, 
+    source_farmer,
     source_commodity,
     source_amount,
-    destination_farmer, 
+    destination_farmer,
     destination_commodity,
     destination_amount,
-    date) 
+    date)
   VALUES (
     $sourceFarmer,
     $sourceCommodity,
@@ -47,7 +47,7 @@ export const ENSURE_FARMER = db.prepare<undefined, [string]>(
 );
 
 export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
-  "SELECT date FROM trade WHERE source_farmer = 'BANK' AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
+  "SELECT date FROM trade WHERE source_farmer = 'BANK' AND source_commodity = 1 AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
 );
 
 export const TOP_BALANCES = db.prepare<{ farmer: string; amount: number }, []>(`
