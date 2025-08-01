@@ -7,13 +7,13 @@ import {
 import { Commodity } from "./enum";
 import {
   CREATE_TRADE,
-  ENSURE_FARMER,
   EXILE,
   GET_BALANCE,
   GET_BALANCES,
   GET_LAST_DOLED,
   IS_EXILED,
   TOP_BALANCES,
+  UPDATE_FARMER,
 } from "./statements";
 
 type Result<T, E> = { value: T } | { error: E };
@@ -44,8 +44,8 @@ const DOLE_RESULT = {
   UNFORTUNATE: 5,
 };
 
-export const getBalances = (id: string) => {
-  ENSURE_FARMER.run(id);
+export const getBalances = (id: string, username: string) => {
+  UPDATE_FARMER.run({ $id: id, $username: username });
   return GET_BALANCES.all({ $farmer: id });
 };
 
@@ -89,7 +89,8 @@ export const trade = (
   };
 };
 
-export const dole = (id: string): DoleResult => {
+export const dole = (id: string, username: string): DoleResult => {
+  UPDATE_FARMER.run({ $id: id, $username: username });
   const lastDoled = GET_LAST_DOLED.get(id);
   if (lastDoled) {
     const lastDoledDate = new Date(lastDoled.date);
@@ -136,7 +137,7 @@ export const dole = (id: string): DoleResult => {
 };
 
 export const getTopBalances = () => {
-  return TOP_BALANCES.all();
+  return TOP_BALANCES.all({ $top: 10 });
 };
 
 export const isExiled = (id: string): boolean => {

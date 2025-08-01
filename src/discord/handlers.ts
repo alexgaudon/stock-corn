@@ -32,7 +32,10 @@ export const commands: Array<Command> = [
         return;
       }
 
-      const balances = getBalances(interaction.user.id);
+      const balances = getBalances(
+        interaction.user.id,
+        interaction.user.username,
+      );
       await interaction.reply({
         embeds: [
           new EmbedBuilder({
@@ -56,7 +59,7 @@ export const commands: Array<Command> = [
         return;
       }
 
-      const doleResult = dole(interaction.user.id);
+      const doleResult = dole(interaction.user.id, interaction.user.username);
       if ("error" in doleResult) {
         switch (doleResult.error.type) {
           case "ALREADY_DOLED":
@@ -219,9 +222,7 @@ export const commands: Array<Command> = [
       .setDescription("Check the top corn barons"),
     handler: async (interaction) => {
       const topBalances = getTopBalances();
-      const balances = topBalances
-        .filter(({ farmer }) => farmer !== "BANK")
-        .map(({ amount }) => amount);
+      const balances = topBalances.map(({ amount }) => amount);
       const leaderboard = (
         await Promise.all(
           topBalances.map(async (entry) => {

@@ -42,20 +42,28 @@ export const CREATE_TRADE = db.prepare<
     CURRENT_TIMESTAMP);
 `);
 
-export const ENSURE_FARMER = db.prepare<undefined, [string]>(
-  "INSERT OR IGNORE INTO farmer (id, date_started) VALUES (?, CURRENT_TIMESTAMP)",
+export const UPDATE_FARMER = db.prepare<
+  undefined,
+  { $id: string; $username: string }
+>(
+  "INSERT INTO farmer (id, date_started, username) VALUES ($id, CURRENT_TIMESTAMP, $username) ON CONFLICT(id) DO UPDATE SET username = excluded.username",
 );
 
 export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
   "SELECT date FROM trade WHERE source_farmer = 'BANK' AND source_commodity = 1 AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
 );
 
-export const TOP_BALANCES = db.prepare<{ farmer: string; amount: number }, []>(`
-  SELECT farmer, amount
-  FROM balance
-  WHERE commodity = 1
+export const TOP_BALANCES = db.prepare<
+  { farmer: string; amount: number; username: string },
+  { $top: number }
+>(`
+  SELECT b.farmer, b.amount, f.username
+  FROM balance b
+  JOIN farmer f ON b.farmer = f.id
+  WHERE b.commodity = 1
   AND farmer NOT IN ('BANK', 'JAIL')
-  ORDER BY amount DESC LIMIT 10
+  ORDER BY b.amount DESC
+  LIMIT $top
 `);
 
 export const EXILE = db.prepare<undefined, [string]>(`

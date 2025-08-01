@@ -1,5 +1,2 @@
-import { startBot } from "./discord/bot.ts";
-import { registerCommands } from "./discord/register.ts";
-
-await registerCommands();
-await startBot();
+import "./discord/index.ts";
+import "./rest/index.ts";
