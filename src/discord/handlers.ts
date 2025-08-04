@@ -14,6 +14,7 @@ import {
   isExiled,
   trade,
 } from "../operations.ts";
+import { userToFarmer } from "./utilities.ts";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
 type Command = {
@@ -32,10 +33,7 @@ export const commands: Array<Command> = [
         return;
       }
 
-      const balances = getBalances(
-        interaction.user.id,
-        interaction.user.username,
-      );
+      const balances = getBalances(userToFarmer(interaction.user));
       await interaction.reply({
         embeds: [
           new EmbedBuilder({
@@ -59,7 +57,7 @@ export const commands: Array<Command> = [
         return;
       }
 
-      const doleResult = dole(interaction.user.id, interaction.user.username);
+      const doleResult = dole(userToFarmer(interaction.user));
       if ("error" in doleResult) {
         switch (doleResult.error.type) {
           case "ALREADY_DOLED":
@@ -255,7 +253,7 @@ export const commands: Array<Command> = [
       }
 
       const user = interaction.options.getUser("user")!;
-      const exileResult = exile(user.id, user.username);
+      const exileResult = exile(userToFarmer(user));
 
       if ("error" in exileResult) {
         switch (exileResult.error.type) {

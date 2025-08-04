@@ -10,8 +10,13 @@
     "zod": "^4.0.14"
   },
   "devDependencies": {
+    "@kitajs/html": "^4.2.9",
     "@types/bun": "latest",
     "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "prod": "bun run src/index.ts"
   },
   "type": "module"
 }

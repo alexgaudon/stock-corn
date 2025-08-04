@@ -15,6 +15,7 @@ import {
   TOP_BALANCES,
   UPDATE_FARMER,
 } from "./statements";
+import type { Farmer } from "./types";
 
 type Result<T, E> = { value: T } | { error: E };
 
@@ -36,7 +37,13 @@ type ExileResult = Result<
   { type: "ALREADY_EXILED" } | { type: "UNKNOWN_ERROR" }
 >;
 
-type IsExiledResult = Result<boolean, { type: "UNKNOWN_ERROR" }>;
+export const updateFarmer = (farmer: Farmer): void => {
+  UPDATE_FARMER.run({
+    $id: farmer.id,
+    $username: farmer.username,
+    $avatar_url: farmer.avatar_url,
+  });
+};
 
 const DOLE_RESULT = {
   NORMAL: 100,
@@ -44,9 +51,9 @@ const DOLE_RESULT = {
   UNFORTUNATE: 5,
 };
 
-export const getBalances = (id: string, username: string) => {
-  UPDATE_FARMER.run({ $id: id, $username: username });
-  return GET_BALANCES.all({ $farmer: id });
+export const getBalances = (farmer: Farmer) => {
+  updateFarmer(farmer);
+  return GET_BALANCES.all({ $farmer: farmer.id });
 };
 
 export const trade = (
@@ -89,9 +96,9 @@ export const trade = (
   };
 };
 
-export const dole = (id: string, username: string): DoleResult => {
-  UPDATE_FARMER.run({ $id: id, $username: username });
-  const lastDoled = GET_LAST_DOLED.get(id);
+export const dole = (farmer: Farmer): DoleResult => {
+  updateFarmer(farmer);
+  const lastDoled = GET_LAST_DOLED.get(farmer.id);
   if (lastDoled) {
     const lastDoledDate = new Date(lastDoled.date);
     const nextDoleDate = addHours(lastDoledDate, 20);
@@ -119,7 +126,7 @@ export const dole = (id: string, username: string): DoleResult => {
     "BANK",
     Commodity.Corn,
     DOLE_RESULT[result],
-    id,
+    farmer.id,
     Commodity.Corn,
     DOLE_RESULT[result],
   );
@@ -145,26 +152,25 @@ export const isExiled = (id: string): boolean => {
   return isExiled?.exiled ?? false;
 };
 
-export const exile = (id: string, username: string): ExileResult => {
-  UPDATE_FARMER.run({ $id: id, $username: username });
+export const exile = (farmer: Farmer): ExileResult => {
+  updateFarmer(farmer);
 
-  const isExiled = IS_EXILED.get(id)?.exiled;
-
+  const isExiled = IS_EXILED.get(farmer.id)?.exiled;
   if (isExiled) {
     return { error: { type: "ALREADY_EXILED" } };
   }
 
-  EXILE.run(id);
+  EXILE.run(farmer.id);
 
   const amountToBeExiled =
     GET_BALANCE.get({
-      $farmer: id,
+      $farmer: farmer.id,
       $commodity: Commodity.Corn,
     })?.amount ?? 0;
 
   if (amountToBeExiled > 0) {
     const exileResult = trade(
-      id,
+      farmer.id,
       Commodity.Corn,
       amountToBeExiled,
       "JAIL",

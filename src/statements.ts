@@ -44,9 +44,15 @@ export const CREATE_TRADE = db.prepare<
 
 export const UPDATE_FARMER = db.prepare<
   undefined,
-  { $id: string; $username: string }
+  { $id: string; $username: string; $avatar_url: string }
 >(
-  "INSERT INTO farmer (id, date_started, username) VALUES ($id, CURRENT_TIMESTAMP, $username) ON CONFLICT(id) DO UPDATE SET username = excluded.username",
+  `
+  INSERT INTO farmer (id, date_started, username, avatar_url) 
+  VALUES ($id, CURRENT_TIMESTAMP, $username, $avatar_url)
+  ON CONFLICT(id) DO UPDATE SET
+    username = excluded.username, 
+    avatar_url = excluded.avatar_url
+  `,
 );
 
 export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
@@ -54,10 +60,10 @@ export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
 );
 
 export const TOP_BALANCES = db.prepare<
-  { farmer: string; amount: number; username: string },
+  { farmer: string; amount: number; username: string; avatar_url: string },
   { $top: number }
 >(`
-  SELECT b.farmer, b.amount, f.username
+  SELECT b.farmer, b.amount, f.username, f.avatar_url
   FROM balance b
   JOIN farmer f ON b.farmer = f.id
   WHERE b.commodity = 1

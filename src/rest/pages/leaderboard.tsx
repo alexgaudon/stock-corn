@@ -8,8 +8,15 @@ export const Leaderboard = () => {
   return (
     <Layout>
       <ul>
-        {top.map(({ farmer, username, amount }) => (
+        {top.map(({ farmer, username, amount, avatar_url }) => (
           <li>
+            {avatar_url && (
+              <img
+                src={avatar_url}
+                alt={username ?? farmer}
+                style={{ width: "32px", height: "32px", borderRadius: "50%" }}
+              />
+            )}{" "}
             <b>
               {username ?? farmer} - {amount}
             </b>

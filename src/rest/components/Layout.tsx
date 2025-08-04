@@ -1,4 +1,5 @@
 import { Html } from "@elysiajs/html";
+import type { PropsWithChildren } from "@kitajs/html";
 
 // Just forward the string as-is.
 // This is just a trick to allow syntax highlighting in some editors.
@@ -12,9 +13,7 @@ const style = css`
   }
 `;
 
-export const Layout = (
-  props: Html.PropsWithChildren<{ head: string; title?: string }>,
-) => (
+export const Layout = (props: PropsWithChildren<{ title?: string }>) => (
   <html lang="en">
     <head>
       <title>Stock Corn</title>
