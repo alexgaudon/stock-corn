@@ -145,8 +145,8 @@ export const isExiled = (id: string): boolean => {
   return isExiled?.exiled ?? false;
 };
 
-export const exile = (id: string): ExileResult => {
-  ENSURE_FARMER.run(id);
+export const exile = (id: string, username: string): ExileResult => {
+  UPDATE_FARMER.run({ $id: id, $username: username });
 
   const isExiled = IS_EXILED.get(id)?.exiled;
 

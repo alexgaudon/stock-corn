@@ -255,7 +255,7 @@ export const commands: Array<Command> = [
       }
 
       const user = interaction.options.getUser("user")!;
-      const exileResult = exile(user.id);
+      const exileResult = exile(user.id, user.username);
 
       if ("error" in exileResult) {
         switch (exileResult.error.type) {
