@@ -1,28 +1,28 @@
-import { db } from "./db";
-import type { Commodity } from "./enum";
+import { db } from "./db.ts";
+import type { Commodity } from "../commodities.ts";
 
 export const GET_BALANCE = db.prepare<
-  { amount: number },
-  [{ $farmer: string; $commodity: Commodity }]
+  [{ farmer: string; commodity: Commodity }],
+  { amount: number }
 >(
   `SELECT amount FROM balance WHERE farmer = $farmer AND commodity = $commodity`,
 );
 
 export const GET_BALANCES = db.prepare<
-  { commodity: Commodity; amount: number },
-  [{ $farmer: string }]
+  [{ farmer: string }],
+  { commodity: Commodity; amount: number }
 >(`SELECT commodity, amount FROM balance WHERE farmer = $farmer`);
 
 export const CREATE_TRADE = db.prepare<
-  undefined,
   {
-    $sourceFarmer: string;
-    $sourceCommodity: Commodity;
-    $sourceAmount: number;
-    $destinationFarmer: string;
-    $destinationCommodity: Commodity;
-    $destinationAmount: number;
-  }
+    sourceFarmer: string;
+    sourceCommodity: Commodity;
+    sourceAmount: number;
+    destinationFarmer: string;
+    destinationCommodity: Commodity;
+    destinationAmount: number;
+  },
+  []
 >(`
   INSERT INTO trade (
     source_farmer,
@@ -43,25 +43,25 @@ export const CREATE_TRADE = db.prepare<
 `);
 
 export const UPDATE_FARMER = db.prepare<
-  undefined,
-  { $id: string; $username: string; $avatar_url: string }
+  { id: string; username: string; avatar_url: string },
+  []
 >(
   `
-  INSERT INTO farmer (id, date_started, username, avatar_url) 
+  INSERT INTO farmer (id, date_started, username, avatar_url)
   VALUES ($id, CURRENT_TIMESTAMP, $username, $avatar_url)
   ON CONFLICT(id) DO UPDATE SET
-    username = excluded.username, 
+    username = excluded.username,
     avatar_url = excluded.avatar_url
   `,
 );
 
-export const GET_LAST_DOLED = db.prepare<{ date: string }, [string]>(
+export const GET_LAST_DOLED = db.prepare<[string], { date: string }>(
   "SELECT date FROM trade WHERE source_farmer = 'BANK' AND source_commodity = 1 AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
 );
 
 export const TOP_BALANCES = db.prepare<
-  { farmer: string; amount: number; username: string; avatar_url: string },
-  { $top: number }
+  { top: number },
+  { farmer: string; amount: number; username: string; avatar_url: string }
 >(`
   SELECT b.farmer, b.amount, f.username, f.avatar_url
   FROM balance b
@@ -72,10 +72,10 @@ export const TOP_BALANCES = db.prepare<
   LIMIT $top
 `);
 
-export const EXILE = db.prepare<undefined, [string]>(`
+export const EXILE = db.prepare<[string], []>(`
   UPDATE farmer SET exiled = 1 WHERE id = ?
 `);
 
-export const IS_EXILED = db.prepare<{ exiled: boolean }, [string]>(`
+export const IS_EXILED = db.prepare<[string], { exiled: boolean }>(`
   SELECT exiled FROM farmer WHERE id = ? LIMIT 1
 `);

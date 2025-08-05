@@ -1,5 +1,5 @@
 import type { User } from "discord.js";
-import type { Farmer } from "../types";
+import type { Farmer } from "$lib/types";
 
 export const userToFarmer = (user: User): Farmer => ({
   id: user.id,

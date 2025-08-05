@@ -4,7 +4,8 @@ import {
   GatewayIntentBits,
   type Interaction,
 } from "discord.js";
-import { commands } from "./handlers.ts";
+import { commands } from "./handlers";
+import { DISCORD_TOKEN } from "../env";
 
 export const startBot = async () => {
   const bot = new Client({
@@ -32,7 +33,7 @@ export const startBot = async () => {
     }
   });
 
-  bot.login(Bun.env.DISCORD_TOKEN);
+  bot.login(DISCORD_TOKEN);
 
   return { bot };
 };

@@ -5,7 +5,7 @@ import {
   SlashCommandBuilder,
   type SlashCommandOptionsOnlyBuilder,
 } from "discord.js";
-import { Commodity } from "../enum.ts";
+import { Commodities, getCommodityName } from "../../commodities";
 import {
   dole,
   exile,
@@ -13,8 +13,9 @@ import {
   getTopBalances,
   isExiled,
   trade,
-} from "../operations.ts";
-import { userToFarmer } from "./utilities.ts";
+} from "../db/operations";
+import { userToFarmer } from "./utilities";
+import { CORN_CZAR_ID } from "../env";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
 type Command = {
@@ -39,7 +40,7 @@ export const commands: Array<Command> = [
           new EmbedBuilder({
             title: "Your stockpile",
             fields: balances.map(({ commodity, amount }) => ({
-              name: Commodity[commodity],
+              name: getCommodityName(commodity),
               value: `${amount}`,
             })),
           }),
@@ -171,10 +172,10 @@ export const commands: Array<Command> = [
       const amount = interaction.options.getInteger("amount")!;
       const tradeResult = trade(
         source,
-        Commodity.Corn,
+        Commodities.Corn,
         amount,
         destinationUser.id,
-        Commodity.Corn,
+        Commodities.Corn,
         amount,
       );
       if ("error" in tradeResult) {
@@ -247,7 +248,7 @@ export const commands: Array<Command> = [
           .setRequired(true),
       ) as SlashCommandBuilder,
     handler: async (interaction) => {
-      if (interaction.user.id !== Bun.env.CORN_CZAR_ID) {
+      if (interaction.user.id !== CORN_CZAR_ID) {
         await interaction.reply("You are not authorized to exile users.");
         return;
       }

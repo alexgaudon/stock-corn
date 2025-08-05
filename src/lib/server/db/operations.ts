@@ -4,7 +4,7 @@ import {
   intervalToDuration,
   type Duration,
 } from "date-fns";
-import { Commodity } from "./enum";
+import { Commodities, type Commodity } from "../../commodities";
 import {
   CREATE_TRADE,
   EXILE,
@@ -15,7 +15,7 @@ import {
   TOP_BALANCES,
   UPDATE_FARMER,
 } from "./statements";
-import type { Farmer } from "./types";
+import type { Farmer } from "$lib/types";
 
 type Result<T, E> = { value: T } | { error: E };
 
@@ -39,9 +39,9 @@ type ExileResult = Result<
 
 export const updateFarmer = (farmer: Farmer): void => {
   UPDATE_FARMER.run({
-    $id: farmer.id,
-    $username: farmer.username,
-    $avatar_url: farmer.avatar_url,
+    id: farmer.id,
+    username: farmer.username,
+    avatar_url: farmer.avatar_url,
   });
 };
 
@@ -53,7 +53,7 @@ const DOLE_RESULT = {
 
 export const getBalances = (farmer: Farmer) => {
   updateFarmer(farmer);
-  return GET_BALANCES.all({ $farmer: farmer.id });
+  return GET_BALANCES.all({ farmer: farmer.id });
 };
 
 export const trade = (
@@ -68,29 +68,29 @@ export const trade = (
     return { error: "INVALID_AMOUNT" };
   }
   const sourceBalance = GET_BALANCE.get({
-    $farmer: sourceFarmer,
-    $commodity: sourceCommodity,
+    farmer: sourceFarmer,
+    commodity: sourceCommodity,
   })!.amount;
   if (sourceBalance < sourceAmount && sourceFarmer !== "BANK") {
     return { error: "INSUFFICIENT_FUNDS" };
   }
   CREATE_TRADE.run({
-    $sourceFarmer: sourceFarmer,
-    $sourceCommodity: sourceCommodity,
-    $sourceAmount: sourceAmount,
-    $destinationFarmer: destinationFarmer,
-    $destinationCommodity: destinationCommodity,
-    $destinationAmount: destinationAmount,
+    sourceFarmer: sourceFarmer,
+    sourceCommodity: sourceCommodity,
+    sourceAmount: sourceAmount,
+    destinationFarmer: destinationFarmer,
+    destinationCommodity: destinationCommodity,
+    destinationAmount: destinationAmount,
   });
   return {
     value: {
       sourceBalance: GET_BALANCE.get({
-        $farmer: sourceFarmer,
-        $commodity: sourceCommodity,
+        farmer: sourceFarmer,
+        commodity: sourceCommodity,
       })!.amount,
       destinationBalance: GET_BALANCE.get({
-        $farmer: destinationFarmer,
-        $commodity: destinationCommodity,
+        farmer: destinationFarmer,
+        commodity: destinationCommodity,
       })!.amount,
     },
   };
@@ -124,10 +124,10 @@ export const dole = (farmer: Farmer): DoleResult => {
 
   const transferResult = trade(
     "BANK",
-    Commodity.Corn,
+    Commodities.Corn,
     DOLE_RESULT[result],
     farmer.id,
-    Commodity.Corn,
+    Commodities.Corn,
     DOLE_RESULT[result],
   );
   if ("error" in transferResult) {
@@ -144,7 +144,7 @@ export const dole = (farmer: Farmer): DoleResult => {
 };
 
 export const getTopBalances = () => {
-  return TOP_BALANCES.all({ $top: 10 });
+  return TOP_BALANCES.all({ top: 10 });
 };
 
 export const isExiled = (id: string): boolean => {
@@ -164,17 +164,17 @@ export const exile = (farmer: Farmer): ExileResult => {
 
   const amountToBeExiled =
     GET_BALANCE.get({
-      $farmer: farmer.id,
-      $commodity: Commodity.Corn,
+      farmer: farmer.id,
+      commodity: Commodities.Corn,
     })?.amount ?? 0;
 
   if (amountToBeExiled > 0) {
     const exileResult = trade(
       farmer.id,
-      Commodity.Corn,
+      Commodities.Corn,
       amountToBeExiled,
       "JAIL",
-      Commodity.Corn,
+      Commodities.Corn,
       amountToBeExiled,
     );
 

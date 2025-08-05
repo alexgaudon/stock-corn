@@ -11,5 +11,5 @@ if [ -f "$DATABASE_PATH" ]; then
 fi
 
 export DATABASE_URL="sqlite:$DATABASE_PATH"
-bun x dbmate up
-bun run src/index.ts
+npm exec dbmate -- up
+node build
