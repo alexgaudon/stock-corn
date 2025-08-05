@@ -1,6 +1,6 @@
 import { formatDuration } from "date-fns";
 import {
-  ChatInputCommandInteraction,
+  type ChatInputCommandInteraction,
   EmbedBuilder,
   SlashCommandBuilder,
   type SlashCommandOptionsOnlyBuilder,
