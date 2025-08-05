@@ -1,5 +1,5 @@
-import { db } from "./db.ts";
-import type { Commodity } from "../commodities.ts";
+import { db } from "./db";
+import type { Commodity } from "../../commodities";
 
 export const GET_BALANCE = db.prepare<
   [{ farmer: string; commodity: Commodity }],
