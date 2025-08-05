@@ -1,6 +1,6 @@
 <script lang="ts">
     import "../app.css";
-    import favicon from "$lib/assets/favicon.svg";
+    import corn from "$lib/assets/corn.png";
 
     let { children } = $props();
     let mobileMenuOpen = $state(false);
@@ -16,7 +16,7 @@
 </script>
 
 <svelte:head>
-    <link rel="icon" href={favicon} />
+    <link rel="icon" href={corn} />
 </svelte:head>
 
 <div class="min-h-screen bg-stone-900 text-stone-50">
@@ -26,7 +26,7 @@
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
-                    <img src={favicon} alt="Logo" class="h-8 w-8" />
+                    <img src={corn} alt="Logo" class="h-12 w-12 rounded-lg" />
                     <h1 class="text-xl font-bold text-stone-50">StockCorn</h1>
                 </div>
 
