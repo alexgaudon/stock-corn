@@ -4,7 +4,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+
+# HACK Workaround for the build failing if no database
+# Please fix soon
+RUN DATABASE_URL=sqlite:db.sqlite3 npm exec dbmate -- up
+RUN DATABASE_PATH=db.sqlite3 npm run build
+
 RUN npm prune --production
 
 # Use another Node.js Alpine image for the final stage
