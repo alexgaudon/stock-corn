@@ -172,8 +172,6 @@ export const commands: Array<Command> = [
       const amount = interaction.options.getInteger("amount")!;
       const tradeResult = trade(
         source,
-        Commodities.Corn,
-        amount,
         destinationUser.id,
         Commodities.Corn,
         amount,

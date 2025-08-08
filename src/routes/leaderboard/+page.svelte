@@ -1,4 +1,5 @@
 <script lang="ts">
+    import corn from "$lib/assets/corn.png";
     type LeaderboardEntry = {
         farmer: string;
         amount: number;
@@ -71,8 +72,9 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center space-x-3">
                                     <img
-                                        src={farmer.avatar_url}
-                                        alt="{farmer.username}'s avatar"
+                                        src={farmer.avatar_url || corn}
+                                        alt="{farmer.username ||
+                                            'unknown user'}'s avatar"
                                         class="h-10 w-10 rounded-full border-2 border-stone-600"
                                         loading="lazy"
                                     />
@@ -80,7 +82,7 @@
                                         <div
                                             class="text-sm font-medium text-stone-50"
                                         >
-                                            {farmer.username}
+                                            {farmer.username || "unknown user"}
                                         </div>
                                         <div class="text-xs text-stone-400">
                                             ID: {farmer.farmer}

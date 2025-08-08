@@ -8,6 +8,8 @@
     const navItems = [
         { href: "/", label: "Dashboard" },
         { href: "/leaderboard", label: "Leaderboard" },
+        { href: "/ledger", label: "Ledger" },
+        { href: "/trades", label: "Trades" },
     ];
 
     function toggleMobileMenu() {

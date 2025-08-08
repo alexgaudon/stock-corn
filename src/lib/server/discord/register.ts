@@ -11,8 +11,8 @@ export const registerCommands = async () => {
     return;
   }
   console.log("Registering commands...");
-  const rest = new REST().setToken(DISCORD_TOKEN);
-  await rest.put(Routes.applicationCommands(DISCORD_APPLICATION_ID), {
+  const rest = new REST().setToken(DISCORD_TOKEN!);
+  await rest.put(Routes.applicationCommands(DISCORD_APPLICATION_ID!), {
     body: Object.values(commands).map(({ data }) => data),
   });
   console.log("Done!");
