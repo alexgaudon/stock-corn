@@ -1,11 +1,35 @@
-import { db } from "./db";
 import type { Commodity } from "../../commodities";
+import { db } from "./db";
+
+export const ENSURE_FARMER = (id: string) => {
+  db.prepare<[string], undefined>(
+    "INSERT OR IGNORE INTO farmer (id, date_started) VALUES (?, CURRENT_TIMESTAMP)",
+  ).run(id);
+  db.prepare<[string], undefined>(
+    "INSERT OR IGNORE INTO balance (farmer, commodity, amount) VALUES (?, 1, 0)",
+  ).run(id);
+}
 
 export const GET_BALANCE = db.prepare<
   [{ farmer: string; commodity: Commodity }],
   { amount: number }
 >(
   `SELECT amount FROM balance WHERE farmer = $farmer AND commodity = $commodity`,
+);
+
+export const GET_LUCK_STATS = db.prepare<[string], { farmer: string; barren: number; normal: number; bountiful: number }>(
+  `SELECT
+      df.username AS farmer,
+      SUM(CASE WHEN tr.amount = 5 THEN 1 ELSE 0 END) AS barren,
+      SUM(CASE WHEN tr.amount = 100 THEN 1 ELSE 0 END) AS normal,
+      SUM(CASE WHEN tr.amount = 777 THEN 1 ELSE 0 END) AS bountiful
+  FROM trade t
+  JOIN farmer sf ON t.source_farmer = sf.id
+  JOIN farmer df ON t.destination_farmer = df.id
+  JOIN transfer tr ON t.id = tr.trade_id
+  WHERE df.id = ? 
+    AND sf.id = 'BANK';
+  `
 );
 
 export const GET_BALANCES = db.prepare<
@@ -100,6 +124,45 @@ export const UPDATE_FARMER = db.prepare<
 export const GET_LAST_DOLED = db.prepare<[string], { date: string }>(
   "SELECT date FROM trade WHERE source_farmer = 'BANK' AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
 );
+
+export const TOP_BALANCES_WITH_LUCK = db.prepare<[number], {
+  farmer: string;
+  amount: number;
+  username: string;
+  avatar_url: string | null;
+  barren: number;
+  normal: number;
+  bountiful: number;
+}>(
+  `SELECT 
+      b.farmer,
+      b.amount,
+      f.username,
+      f.avatar_url,
+      COALESCE(l.barren, 0)   AS barren,
+      COALESCE(l.normal, 0)   AS normal,
+      COALESCE(l.bountiful, 0) AS bountiful
+   FROM balance b
+   JOIN farmer f ON b.farmer = f.id
+   LEFT JOIN (
+       SELECT
+           df.id AS farmer_id,
+           SUM(CASE WHEN tr.amount = 5 THEN 1 ELSE 0 END) AS barren,
+           SUM(CASE WHEN tr.amount = 100 THEN 1 ELSE 0 END) AS normal,
+           SUM(CASE WHEN tr.amount = 777 THEN 1 ELSE 0 END) AS bountiful
+       FROM trade t
+       JOIN farmer sf ON t.source_farmer = sf.id
+       JOIN farmer df ON t.destination_farmer = df.id
+       JOIN transfer tr ON t.id = tr.trade_id
+       WHERE sf.id = 'BANK'
+       GROUP BY df.id
+   ) l ON b.farmer = l.farmer_id
+   WHERE b.commodity = 1
+     AND f.id NOT IN ('BANK', 'JAIL')
+   ORDER BY b.amount DESC
+   LIMIT ?;`
+);
+
 
 export const TOP_BALANCES = db.prepare<
   { top: number },

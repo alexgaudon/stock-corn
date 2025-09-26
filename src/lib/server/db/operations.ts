@@ -1,23 +1,25 @@
+import type { Farmer } from "$lib/types";
 import {
-  addHours,
+  addSeconds,
   interval,
   intervalToDuration,
-  type Duration,
+  type Duration
 } from "date-fns";
 import { Commodities, type Commodity } from "../../commodities";
 import {
+  ENSURE_FARMER,
   EXILE,
   GET_BALANCE,
   GET_BALANCES,
   GET_LAST_DOLED,
+  GET_LUCK_STATS,
   GET_TRADES_COUNT,
   GET_TRADES_WITH_TRANSFERS,
   IMMEDIATE_TRADE,
   IS_EXILED,
   TOP_BALANCES,
-  UPDATE_FARMER,
+  UPDATE_FARMER
 } from "./statements";
-import type { Farmer } from "$lib/types";
 
 type Result<T, E> = { value: T } | { error: E };
 
@@ -101,7 +103,22 @@ const DOLE_RESULT = {
   UNFORTUNATE: 5,
 };
 
+export const getLuck = (farmer: Farmer): {
+  farmer: string;
+  barren: number;
+  normal: number;
+  bountiful: number;
+} | undefined => {
+  ENSURE_FARMER(farmer.id);
+  updateFarmer(farmer);
+  const luck = GET_LUCK_STATS.get(farmer.id)
+  console.log('Raw Luck:\n', luck);
+  return luck;
+};
+
 export const getBalances = (farmer: Farmer) => {
+  const res = ENSURE_FARMER(farmer.id);
+  console.log('ENSURE_FARMER', res);
   updateFarmer(farmer);
   return GET_BALANCES.all({ farmer: farmer.id });
 };
@@ -118,7 +135,7 @@ export const trade = (
   const sourceBalance = GET_BALANCE.get({
     farmer: sourceFarmer,
     commodity,
-  })!.amount;
+  })?.amount ?? 0;
   if (sourceBalance < amount && sourceFarmer !== "BANK") {
     return { error: "INSUFFICIENT_FUNDS" };
   }
@@ -147,7 +164,7 @@ export const dole = (farmer: Farmer): DoleResult => {
   const lastDoled = GET_LAST_DOLED.get(farmer.id);
   if (lastDoled) {
     const lastDoledDate = new Date(lastDoled.date);
-    const nextDoleDate = addHours(lastDoledDate, 20);
+    const nextDoleDate = addSeconds(lastDoledDate, 1);
     const now = new Date();
     if (now < nextDoleDate) {
       return {
@@ -217,6 +234,7 @@ export const getTopBalances = () => {
 };
 
 export const isExiled = (id: string): boolean => {
+  ENSURE_FARMER(id);
   const isExiled = IS_EXILED.get(id);
   return isExiled?.exiled ?? false;
 };

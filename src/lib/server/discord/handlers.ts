@@ -10,12 +10,13 @@ import {
   dole,
   exile,
   getBalances,
+  getLuck,
   getTopBalances,
   isExiled,
   trade,
 } from "../db/operations";
-import { userToFarmer } from "./utilities";
 import { CORN_CZAR_ID } from "../env";
+import { userToFarmer } from "./utilities";
 
 type Handler = (interaction: ChatInputCommandInteraction) => Promise<void>;
 type Command = {
@@ -24,6 +25,29 @@ type Command = {
 };
 
 export const commands: Array<Command> = [
+  {
+    data: new SlashCommandBuilder().setName("luck").setDescription("Check your luck"),
+    handler: async (interaction) => {
+      const luck = getLuck(userToFarmer(interaction.user));
+      if (luck === undefined) {
+        await interaction.reply("You have not harvested before. We do not have stats for you.");
+        return;
+      }
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0x00BEEF)
+            .addFields(
+              { name: "Barren", value: `${luck.barren}`, inline: true },
+              { name: "Normal", value: `${luck.normal}`, inline: true },
+              { name: "🌽 Bountiful", value: `${luck.bountiful}`, inline: true },
+            )
+            .setFooter({ text: "Bank trades only" })
+            .setTimestamp()
+        ]
+      });
+    }
+  },
   {
     data: new SlashCommandBuilder()
       .setName("balance")
@@ -224,9 +248,8 @@ export const commands: Array<Command> = [
         await Promise.all(
           topBalances.map(async (entry) => {
             const user = await interaction.client.users.fetch(entry.farmer);
-            return `${balances.indexOf(entry.amount) + 1}\\. ${
-              user.username
-            }: ${entry.amount}`;
+            return `${balances.indexOf(entry.amount) + 1}\\. ${user.username
+              }: ${entry.amount}`;
           }),
         )
       ).join("\n");
