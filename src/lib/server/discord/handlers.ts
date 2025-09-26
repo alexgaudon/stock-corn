@@ -11,7 +11,7 @@ import {
   exile,
   getBalances,
   getLuck,
-  getTopBalances,
+  getLuckStats,
   isExiled,
   trade,
 } from "../db/operations";
@@ -27,27 +27,48 @@ type Command = {
 
 export const commands: Array<Command> = [
   {
-    data: new SlashCommandBuilder().setName("luck").setDescription("Check your luck"),
+    data: new SlashCommandBuilder()
+      .setName("luck")
+      .setDescription("Check your luck"),
     handler: async (interaction) => {
-      const luck = getLuck(userToFarmer(interaction.user));
-      if (luck === undefined) {
-        await interaction.reply("You have not harvested before. We do not have stats for you.");
+      const luckRaw = getLuck(userToFarmer(interaction.user));
+      if (luckRaw === undefined) {
+        await interaction.reply(
+          "You have not harvested before. We do not have stats for you.",
+        );
         return;
       }
+      const luck = getLuckStats({
+        barren: luckRaw.barren,
+        normal: luckRaw.normal,
+        bountiful: luckRaw.bountiful,
+      });
       await interaction.reply({
         embeds: [
           new EmbedBuilder()
-            .setColor(0x00BEEF)
+            .setColor(0x00beef)
             .addFields(
-              { name: "Barren", value: `${luck.barren}`, inline: true },
-              { name: "Normal", value: `${luck.normal}`, inline: true },
-              { name: "🌽 Bountiful", value: `${luck.bountiful}`, inline: true },
+              {
+                name: "Barren",
+                value: `Count: ${luckRaw.barren}\nActual: ${luck.barren}%\nTheory: ${luck.barrenTheory}%`,
+                inline: true,
+              },
+              {
+                name: "Normal",
+                value: `Count: ${luckRaw.normal}\nActual: ${luck.normal}%\nTheory: ${luck.normalTheory}%`,
+                inline: true,
+              },
+              {
+                name: "🌽 Bountiful",
+                value: `Count: ${luckRaw.bountiful}\nActual: ${luck.bountiful}%\nTheory: ${luck.bountifulTheory}%`,
+                inline: true,
+              },
             )
             .setFooter({ text: "Bank trades only" })
-            .setTimestamp()
-        ]
+            .setTimestamp(),
+        ],
       });
-    }
+    },
   },
   {
     data: new SlashCommandBuilder()
@@ -238,30 +259,31 @@ export const commands: Array<Command> = [
       });
     },
   },
-   {
-     data: new SlashCommandBuilder()
-       .setName("leaderboard")
-       .setDescription("Check the top corn barons"),
-     handler: async (interaction) => {
-       const topBalancesWithLuck = TOP_BALANCES_WITH_LUCK.all(10);
-       await interaction.reply({
-         embeds: [
-           new EmbedBuilder()
-             .setTitle("Top Corn Barons")
-             .setColor(0x00BEEF)
-             .setFields(
-               topBalancesWithLuck.map((entry, index) => ({
-                 name: `${index + 1}. ${entry.username}`,
-                 value: `${entry.amount} cobs | Barren: ${entry.barren} | Normal: ${entry.normal} | Bountiful: ${entry.bountiful}`,
-                 inline: true,
-               })),
-             )
-             .setFooter({ text: "Bank trades only" })
-             .setTimestamp(),
-         ],
-       });
-     },
-   },
+  {
+    data: new SlashCommandBuilder()
+      .setName("leaderboard")
+      .setDescription("Check the top corn barons"),
+    handler: async (interaction) => {
+      const topBalancesWithLuck = TOP_BALANCES_WITH_LUCK.all(10);
+      await interaction.reply({
+        embeds: [
+          new EmbedBuilder()
+            .setTitle("Top Corn Barons")
+            .setColor(0x00beef)
+            .setFields(
+              topBalancesWithLuck.map((entry, index) => {
+                return {
+                  name: `${index + 1}. ${entry.username}`,
+                  value: `${entry.amount} cobs\n`,
+                  inline: true,
+                };
+              }),
+            )
+            .setTimestamp(),
+        ],
+      });
+    },
+  },
   {
     data: new SlashCommandBuilder()
       .setName("exile")

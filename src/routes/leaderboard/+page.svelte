@@ -6,10 +6,12 @@
     username: string;
     avatar_url: string | null;
     barren: number;
+    barrenTheory: number;
     normal: number;
+    normalTheory: number;
     bountiful: number;
+    bountifulTheory: number;
   };
-
   type PageData = {
     leaderboard: LeaderboardEntry[];
   };
@@ -43,20 +45,17 @@
               Farmer
             </th>
             <th
-              class="px-6 py-4 font-medium text-stone-300 text-xs text-left uppercase tracking-wider"
+              class="px-6 py-4 font-medium text-stone-300 text-xs text-center uppercase tracking-wider"
+              >Barren</th
             >
-              Barren
-            </th>
             <th
-              class="px-6 py-4 font-medium text-stone-300 text-xs text-left uppercase tracking-wider"
+              class="px-6 py-4 font-medium text-stone-300 text-xs text-center uppercase tracking-wider"
+              >Normal</th
             >
-              Normal
-            </th>
             <th
-              class="px-6 py-4 font-medium text-stone-300 text-xs text-left uppercase tracking-wider"
+              class="px-6 py-4 font-medium text-stone-300 text-xs text-center uppercase tracking-wider"
+              >Bountiful</th
             >
-              Bountiful
-            </th>
             <th
               class="px-6 py-4 font-medium text-stone-300 text-xs text-right uppercase tracking-wider"
             >
@@ -100,19 +99,43 @@
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 text-left whitespace-nowrap">
-                <div class="text-lg">
-                  {farmer.barren.toLocaleString()}
+              <td class="px-6 py-4 text-center whitespace-nowrap">
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-mono text-lg"
+                    >{farmer.barren.toLocaleString()}</span
+                  >
+                  <span class="text-stone-400 text-xs"
+                    >Actual: {farmer.barren}%</span
+                  >
+                  <span class="text-stone-500 text-xs"
+                    >Theory: {farmer.barrenTheory}%</span
+                  >
                 </div>
               </td>
-              <td class="px-6 py-4 text-left whitespace-nowrap">
-                <div class="text-lg">
-                  {farmer.normal.toLocaleString()}
+              <td class="px-6 py-4 text-center whitespace-nowrap">
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-mono text-lg"
+                    >{farmer.normal.toLocaleString()}</span
+                  >
+                  <span class="text-stone-400 text-xs"
+                    >Actual: {farmer.normal}%</span
+                  >
+                  <span class="text-stone-500 text-xs"
+                    >Theory: {farmer.normalTheory}%</span
+                  >
                 </div>
               </td>
-              <td class="px-6 py-4 text-left whitespace-nowrap">
-                <div class="text-lg">
-                  {farmer.bountiful.toLocaleString()}
+              <td class="px-6 py-4 text-center whitespace-nowrap">
+                <div class="flex flex-col items-center gap-1">
+                  <span class="font-mono text-lg"
+                    >{farmer.bountiful.toLocaleString()}</span
+                  >
+                  <span class="text-stone-400 text-xs"
+                    >Actual: {farmer.bountiful}%</span
+                  >
+                  <span class="text-stone-500 text-xs"
+                    >Theory: {farmer.bountifulTheory}%</span
+                  >
                 </div>
               </td>
               <td class="px-6 py-4 text-right whitespace-nowrap">

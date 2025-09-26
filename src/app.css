@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
 html {
-    background-color: var(--color-stone-900);
-    color: var(--color-stone-50);
+  background-color: var(--color-stone-900);
+  color: var(--color-stone-50);
 }

@@ -8,7 +8,7 @@ export const ENSURE_FARMER = (id: string) => {
   db.prepare<[string], undefined>(
     "INSERT OR IGNORE INTO balance (farmer, commodity, amount) VALUES (?, 1, 0)",
   ).run(id);
-}
+};
 
 export const GET_BALANCE = db.prepare<
   [{ farmer: string; commodity: Commodity }],
@@ -17,7 +17,10 @@ export const GET_BALANCE = db.prepare<
   `SELECT amount FROM balance WHERE farmer = $farmer AND commodity = $commodity`,
 );
 
-export const GET_LUCK_STATS = db.prepare<[string], { farmer: string; barren: number; normal: number; bountiful: number }>(
+export const GET_LUCK_STATS = db.prepare<
+  [string],
+  { farmer: string; barren: number; normal: number; bountiful: number }
+>(
   `SELECT
       df.username AS farmer,
       SUM(CASE WHEN tr.amount = 5 THEN 1 ELSE 0 END) AS barren,
@@ -29,7 +32,7 @@ export const GET_LUCK_STATS = db.prepare<[string], { farmer: string; barren: num
   JOIN transfer tr ON t.id = tr.trade_id
   WHERE df.id = ? 
     AND sf.id = 'BANK';
-  `
+  `,
 );
 
 export const GET_BALANCES = db.prepare<
@@ -125,15 +128,18 @@ export const GET_LAST_DOLED = db.prepare<[string], { date: string }>(
   "SELECT date FROM trade WHERE source_farmer = 'BANK' AND destination_farmer = ? ORDER BY date DESC LIMIT 1",
 );
 
-export const TOP_BALANCES_WITH_LUCK = db.prepare<[number], {
-  farmer: string;
-  amount: number;
-  username: string;
-  avatar_url: string | null;
-  barren: number;
-  normal: number;
-  bountiful: number;
-}>(
+export const TOP_BALANCES_WITH_LUCK = db.prepare<
+  [number],
+  {
+    farmer: string;
+    amount: number;
+    username: string;
+    avatar_url: string | null;
+    barren: number;
+    normal: number;
+    bountiful: number;
+  }
+>(
   `SELECT 
       b.farmer,
       b.amount,
@@ -160,9 +166,8 @@ export const TOP_BALANCES_WITH_LUCK = db.prepare<[number], {
    WHERE b.commodity = 1
      AND f.id NOT IN ('BANK', 'JAIL')
    ORDER BY b.amount DESC
-   LIMIT ?;`
+   LIMIT ?;`,
 );
-
 
 export const TOP_BALANCES = db.prepare<
   { top: number },
