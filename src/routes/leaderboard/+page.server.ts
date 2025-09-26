@@ -14,8 +14,6 @@ type LeaderboardEntry = {
 export const load: PageServerLoad = async () => {
   const leaderboardData: LeaderboardEntry[] = TOP_BALANCES_WITH_LUCK.all(100);
 
-  console.log(leaderboardData);
-
   return {
     leaderboard: leaderboardData,
   };

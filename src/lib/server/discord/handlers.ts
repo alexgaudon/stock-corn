@@ -15,6 +15,7 @@ import {
   isExiled,
   trade,
 } from "../db/operations";
+import { TOP_BALANCES_WITH_LUCK } from "../db/statements";
 import { CORN_CZAR_ID } from "../env";
 import { userToFarmer } from "./utilities";
 
@@ -237,27 +238,30 @@ export const commands: Array<Command> = [
       });
     },
   },
-  {
-    data: new SlashCommandBuilder()
-      .setName("leaderboard")
-      .setDescription("Check the top corn barons"),
-    handler: async (interaction) => {
-      const topBalances = getTopBalances();
-      const balances = topBalances.map(({ amount }) => amount);
-      const leaderboard = (
-        await Promise.all(
-          topBalances.map(async (entry) => {
-            const user = await interaction.client.users.fetch(entry.farmer);
-            return `${balances.indexOf(entry.amount) + 1}\\. ${user.username
-              }: ${entry.amount}`;
-          }),
-        )
-      ).join("\n");
-      await interaction.reply({
-        content: `The top corn barons are:\n${leaderboard}`,
-      });
-    },
-  },
+   {
+     data: new SlashCommandBuilder()
+       .setName("leaderboard")
+       .setDescription("Check the top corn barons"),
+     handler: async (interaction) => {
+       const topBalancesWithLuck = TOP_BALANCES_WITH_LUCK.all(10);
+       await interaction.reply({
+         embeds: [
+           new EmbedBuilder()
+             .setTitle("Top Corn Barons")
+             .setColor(0x00BEEF)
+             .setFields(
+               topBalancesWithLuck.map((entry, index) => ({
+                 name: `${index + 1}. ${entry.username}`,
+                 value: `${entry.amount} cobs | Barren: ${entry.barren} | Normal: ${entry.normal} | Bountiful: ${entry.bountiful}`,
+                 inline: true,
+               })),
+             )
+             .setFooter({ text: "Bank trades only" })
+             .setTimestamp(),
+         ],
+       });
+     },
+   },
   {
     data: new SlashCommandBuilder()
       .setName("exile")
