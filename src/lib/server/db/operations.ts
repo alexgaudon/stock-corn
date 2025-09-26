@@ -116,7 +116,7 @@ export const getLuck = (farmer: Farmer): {
 };
 
 export const getBalances = (farmer: Farmer) => {
-  const res = ENSURE_FARMER(farmer.id);
+  ENSURE_FARMER(farmer.id);
   updateFarmer(farmer);
   return GET_BALANCES.all({ farmer: farmer.id });
 };
