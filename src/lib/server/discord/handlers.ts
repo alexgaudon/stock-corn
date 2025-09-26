@@ -50,17 +50,17 @@ export const commands: Array<Command> = [
             .addFields(
               {
                 name: "Barren",
-                value: `Count: ${luckRaw.barren}\nActual: ${luck.barren}%\nTheory: ${luck.barrenTheory}%`,
+                value: `Count: ${luckRaw.barren}\nActual: ${luck.barrenPercent}%\nTheory: ${luck.barrenTheory}%`,
                 inline: true,
               },
               {
                 name: "Normal",
-                value: `Count: ${luckRaw.normal}\nActual: ${luck.normal}%\nTheory: ${luck.normalTheory}%`,
+                value: `Count: ${luckRaw.normal}\nActual: ${luck.normalPercent}%\nTheory: ${luck.normalTheory}%`,
                 inline: true,
               },
               {
                 name: "🌽 Bountiful",
-                value: `Count: ${luckRaw.bountiful}\nActual: ${luck.bountiful}%\nTheory: ${luck.bountifulTheory}%`,
+                value: `Count: ${luckRaw.bountiful}\nActual: ${luck.bountifulPercent}%\nTheory: ${luck.bountifulTheory}%`,
                 inline: true,
               },
             )

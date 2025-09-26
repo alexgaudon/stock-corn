@@ -7,29 +7,35 @@ type LeaderboardEntry = {
   amount: number;
   username: string;
   avatar_url: string | null;
+  barren: number;
+  normal: number;
+  bountiful: number;
 };
 
 type LuckStats = {
-  barren: number;
+  barrenPercent: number;
   barrenTheory: number;
-  normal: number;
+  normalPercent: number;
   normalTheory: number;
-  bountiful: number;
+  bountifulPercent: number;
   bountifulTheory: number;
 };
 
 export const load: PageServerLoad = async () => {
   const leaderboardData: (LeaderboardEntry & LuckStats)[] =
     TOP_BALANCES_WITH_LUCK.all(100).map((entry) => {
+      const luckStats = getLuckStats({
+        bountiful: entry.bountiful,
+        barren: entry.barren,
+        normal: entry.normal,
+      });
       return {
         ...entry,
-        ...getLuckStats({
-          bountiful: entry.bountiful,
-          barren: entry.barren,
-          normal: entry.normal,
-        }),
+        ...luckStats,
       };
     });
+
+  console.log(leaderboardData);
 
   return {
     leaderboard: leaderboardData,

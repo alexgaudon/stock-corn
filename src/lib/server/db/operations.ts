@@ -3,7 +3,7 @@ import {
   addHours,
   interval,
   intervalToDuration,
-  type Duration
+  type Duration,
 } from "date-fns";
 import { Commodities, type Commodity } from "../../commodities";
 import {
@@ -126,11 +126,11 @@ export const getLuckStats = (stats: {
 }) => {
   const total = stats.barren + stats.normal + stats.bountiful;
   return {
-    barren: Math.round((stats.barren / total) * 100),
+    barrenPercent: Math.round((stats.barren / total) * 100),
     barrenTheory: LUCK_LOW_ROLL * 100,
-    normal: Math.round((stats.normal / total) * 100),
+    normalPercent: Math.round((stats.normal / total) * 100),
     normalTheory: LUCK_NORMAL_ROLL * 100,
-    bountiful: Math.round((stats.bountiful / total) * 100),
+    bountifulPercent: Math.round((stats.bountiful / total) * 100),
     bountifulTheory: LUCK_HIGH_ROLL * 100,
   };
 };
@@ -139,11 +139,11 @@ export const getLuck = (
   farmer: Farmer,
 ):
   | {
-    farmer: string;
-    barren: number;
-    normal: number;
-    bountiful: number;
-  }
+      farmer: string;
+      barren: number;
+      normal: number;
+      bountiful: number;
+    }
   | undefined => {
   ENSURE_FARMER(farmer.id);
   updateFarmer(farmer);

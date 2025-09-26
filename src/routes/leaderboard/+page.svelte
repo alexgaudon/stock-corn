@@ -6,14 +6,21 @@
     username: string;
     avatar_url: string | null;
     barren: number;
-    barrenTheory: number;
     normal: number;
-    normalTheory: number;
     bountiful: number;
+  };
+
+  type LuckStats = {
+    barrenPercent: number;
+    barrenTheory: number;
+    normalPercent: number;
+    normalTheory: number;
+    bountifulPercent: number;
     bountifulTheory: number;
   };
+
   type PageData = {
-    leaderboard: LeaderboardEntry[];
+    leaderboard: LeaderboardEntry & LuckStats[];
   };
 
   let { data }: { data: PageData } = $props();
@@ -105,7 +112,7 @@
                     >{farmer.barren.toLocaleString()}</span
                   >
                   <span class="text-stone-400 text-xs"
-                    >Actual: {farmer.barren}%</span
+                    >Actual: {farmer.barrenPercent}%</span
                   >
                   <span class="text-stone-500 text-xs"
                     >Theory: {farmer.barrenTheory}%</span
@@ -118,7 +125,7 @@
                     >{farmer.normal.toLocaleString()}</span
                   >
                   <span class="text-stone-400 text-xs"
-                    >Actual: {farmer.normal}%</span
+                    >Actual: {farmer.normalPercent}%</span
                   >
                   <span class="text-stone-500 text-xs"
                     >Theory: {farmer.normalTheory}%</span
@@ -131,7 +138,7 @@
                     >{farmer.bountiful.toLocaleString()}</span
                   >
                   <span class="text-stone-400 text-xs"
-                    >Actual: {farmer.bountiful}%</span
+                    >Actual: {farmer.bountifulPercent}%</span
                   >
                   <span class="text-stone-500 text-xs"
                     >Theory: {farmer.bountifulTheory}%</span
