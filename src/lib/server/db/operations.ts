@@ -1,6 +1,6 @@
 import type { Farmer } from "$lib/types";
 import {
-  addSeconds,
+  addHours,
   interval,
   intervalToDuration,
   type Duration
@@ -112,7 +112,6 @@ export const getLuck = (farmer: Farmer): {
   ENSURE_FARMER(farmer.id);
   updateFarmer(farmer);
   const luck = GET_LUCK_STATS.get(farmer.id)
-  console.log('Raw Luck:\n', luck);
   return luck;
 };
 
@@ -164,7 +163,7 @@ export const dole = (farmer: Farmer): DoleResult => {
   const lastDoled = GET_LAST_DOLED.get(farmer.id);
   if (lastDoled) {
     const lastDoledDate = new Date(lastDoled.date);
-    const nextDoleDate = addSeconds(lastDoledDate, 1);
+    const nextDoleDate = addHours(lastDoledDate, 20);
     const now = new Date();
     if (now < nextDoleDate) {
       return {
