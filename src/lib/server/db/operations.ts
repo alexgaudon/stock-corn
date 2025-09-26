@@ -1,9 +1,9 @@
 import type { Farmer } from "$lib/types";
 import {
-  addSeconds,
+  addHours,
   interval,
   intervalToDuration,
-  type Duration,
+  type Duration
 } from "date-fns";
 import { Commodities, type Commodity } from "../../commodities";
 import {
@@ -139,11 +139,11 @@ export const getLuck = (
   farmer: Farmer,
 ):
   | {
-      farmer: string;
-      barren: number;
-      normal: number;
-      bountiful: number;
-    }
+    farmer: string;
+    barren: number;
+    normal: number;
+    bountiful: number;
+  }
   | undefined => {
   ENSURE_FARMER(farmer.id);
   updateFarmer(farmer);
@@ -199,7 +199,7 @@ export const dole = (farmer: Farmer): DoleResult => {
   const lastDoled = GET_LAST_DOLED.get(farmer.id);
   if (lastDoled) {
     const lastDoledDate = new Date(lastDoled.date);
-    const nextDoleDate = addSeconds(lastDoledDate, 1);
+    const nextDoleDate = addHours(lastDoledDate, 20);
     const now = new Date();
     if (now < nextDoleDate) {
       return {
